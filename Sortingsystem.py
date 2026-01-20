@@ -1,4 +1,5 @@
 import time
+import os
 
 def bubble_sort_descending(arr):
     """
@@ -221,7 +222,12 @@ def compare_all_sorts(data):
 
 # Main program
 if __name__ == "__main__":
-    filename = "dataset.txt"
+    # Get the directory where this script is located
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Construct the full path to dataset.txt in the same directory
+    filename = os.path.join(script_dir, "dataset.txt")
+    
     print(f"Reading data from '{filename}'...")
     
     data = read_dataset(filename)
@@ -255,9 +261,9 @@ if __name__ == "__main__":
             compare_all_sorts(data)
             
         elif choice == '5':
-            print("\n==========================================")
-            print("   Thank you for using the program!")
-            print("==========================================\n")
+            print("\n<=========================================>")
+            print("   Goodbye! Thanks for stopping by :)    ")
+            print("<==========================================>\n")
             break
             
         else:
