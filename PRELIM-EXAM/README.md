@@ -67,8 +67,6 @@ sorting-algorithm-stress-test/
 
 ### Performance Testing Results
 
-**System Specs:** [Add your system specs here]
-
 #### 1,000 Records
 
 | Algorithm | Execution Time |
