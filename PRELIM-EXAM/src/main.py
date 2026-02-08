@@ -293,7 +293,7 @@ class SortingBenchmarkApp(tk.Tk):
         results_section.pack(fill="both", expand=True, padx=40, pady=(0, 20))
         
         tk.Label(
-            results_section, text="Top 100 Sorted Records",
+            results_section, text="First 100 Sorted Datasets",
             font=("Arial", 11, "bold"),
             bg=self.colors['card'],
             fg=self.colors['text_dark']
@@ -431,7 +431,7 @@ class SortingBenchmarkApp(tk.Tk):
             self.is_data_ready = True
             
             self.after(0, lambda: self._update_status(
-                f"Dataset loaded: {len(self.dataset):,} records in {load_duration:.2f}s | ദ്ദി(ᵔᗜᵔ)"
+                f"Dataset loaded: {len(self.dataset):,} items was loaded in approximately {load_duration:.2f}s | ദ്ദി(ᵔᗜᵔ)"
             ))
             self.after(0, lambda: self.size_hint.config(
                 text=f"Available: 1 to {len(self.dataset):,}"

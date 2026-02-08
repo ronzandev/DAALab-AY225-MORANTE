@@ -1,61 +1,41 @@
 """
-Sorting Algorithms Module for DAA Prelim Exam
-==============================================
-This module provides implementations of classic sorting algorithms
-optimized for sorting lists of dictionaries by a specified key.
-
-Algorithms:
-    - Bubble Sort:    O(n²) time, O(1) space, Stable
-    - Insertion Sort: O(n²) time, O(1) space, Stable  
-    - Merge Sort:     O(n log n) time, O(n) space, Stable
+Sorting Algorithms - DAA Prelim Exam
+Bubble Sort, Insertion Sort, Merge Sort
 """
 
 import math
 
 def bubble_sort(data, key, descending=False, progress_callback=None, cancel_event=None):
     """
-    Sorts a list of dictionaries using Bubble Sort.
-    
-    Complexity:
-        Time:  O(n²) average/worst, O(n) best (already sorted)
-        Space: O(1) - sorts in-place
-        Stable: Yes - equal elements maintain relative order
-    
-    Args:
-        data (list): List of dictionaries to sort.
-        key (str): The key in the dictionary to sort by.
-        descending (bool): Sort in descending order if True.
-        progress_callback (callable): Function to call with progress percentage (0-100).
-        cancel_event (threading.Event): Event to check for cancellation.
-        
-    Returns:
-        list: The sorted list, or None if cancelled.
+    Bubble Sort - compares neighbors and swaps them
+    O(n²) time, O(1) space
     """
-    # Create a copy to avoid modifying original data
+    # Make a copy so we don't mess up the original list
     data = data[:]
     n = len(data)
     
-    # Pre-fetch cancellation check for performance
+    # Setup cancel checker (for the STOP button)
     is_cancelled = cancel_event.is_set if cancel_event else (lambda: False)
     
-    # Total comparisons for progress calculation: n*(n-1)/2
+    # Figure out how many comparisons we'll do total
     total_comparisons = n * (n - 1) // 2
     comparisons_done = 0
     
-    # Outer loop: each pass bubbles the largest unsorted element to the end
+    # Go through the list multiple times
     for i in range(n):
+        # Check if user pressed STOP
         if is_cancelled():
             return None
             
         swapped = False
         comparisons_in_pass = n - i - 1
         
-        # Inner loop: compare adjacent elements
+        # Compare each pair of neighbors
         for j in range(0, comparisons_in_pass):
             val1 = data[j].get(key)
             val2 = data[j+1].get(key)
             
-            # Determine if swap is needed based on sort order
+            # Figure out if we need to swap these two
             should_swap = False
             if descending:
                 if val1 < val2:
@@ -65,69 +45,58 @@ def bubble_sort(data, key, descending=False, progress_callback=None, cancel_even
                     should_swap = True
                     
             if should_swap:
-                # Swap adjacent elements
+                # Swap the two items
                 data[j], data[j+1] = data[j+1], data[j]
                 swapped = True
             
-            # Periodic cancellation check for responsiveness
+            # Every 1000 comparisons, check if user wants to stop
             if j % 1000 == 0 and is_cancelled():
                 return None
         
-        # Update progress based on work completed
+        # Update the progress bar
         comparisons_done += comparisons_in_pass
         if progress_callback:
             p = (comparisons_done / total_comparisons) * 100
             progress_callback(min(p, 99.9))
         
-        # Optimization: If no swaps occurred, array is already sorted
+        # If nothing got swapped this round, we're done early!
         if not swapped:
             break
     
+    # Set progress to 100%
     if progress_callback:
         progress_callback(100)
     return data
 
 def insertion_sort(data, key, descending=False, progress_callback=None, cancel_event=None):
     """
-    Sorts a list of dictionaries using Insertion Sort.
-    
-    Complexity:
-        Time:  O(n²) average/worst, O(n) best (already sorted)
-        Space: O(1) - sorts in-place
-        Stable: Yes - equal elements maintain relative order
-    
-    Args:
-        data (list): List of dictionaries to sort.
-        key (str): The key in the dictionary to sort by.
-        descending (bool): Sort in descending order if True.
-        progress_callback (callable): Function to call with progress percentage (0-100).
-        cancel_event (threading.Event): Event to check for cancellation.
-        
-    Returns:
-        list: The sorted list, or None if cancelled.
+    Insertion Sort - picks elements and puts them in the right spot
+    O(n²) time, O(1) space
     """
-    # Create a copy to avoid modifying original data
+    # Make a copy so we don't mess up the original list
     data = data[:]
     n = len(data)
     
+    # Setup cancel checker
     is_cancelled = cancel_event.is_set if cancel_event else (lambda: False)
     
-    # Iterate through unsorted portion (starting at index 1)
+    # Start from second item (first item is already "sorted")
     for i in range(1, n):
+        # Check if user pressed STOP
         if is_cancelled():
             return None
             
-        # Store the current element to be inserted
+        # Grab the current item we're trying to place
         current_record = data[i]
         current_val = current_record.get(key)
         j = i - 1
         
-        # Shift elements in sorted portion to make room for current element
+        # Move backwards through the sorted part
         while j >= 0:
             compare_val = data[j].get(key)
             should_move = False
             
-            # Compare based on sort order
+            # Check if we need to keep moving
             if descending:
                 if compare_val < current_val:
                     should_move = True
@@ -136,62 +105,53 @@ def insertion_sort(data, key, descending=False, progress_callback=None, cancel_e
                     should_move = True
             
             if should_move:
-                # Shift element right to make space
+                # Scoot this item to the right to make room
                 data[j + 1] = data[j]
                 j -= 1
             else:
+                # Found the right spot!
                 break
         
-        # Insert current element in its correct position
+        # Drop the current item into its correct position
         data[j + 1] = current_record
         
-        # Update progress (using quadratic mapping for accurate time representation)
+        # Update progress bar every 10 items
         if progress_callback and i % 10 == 0:
-            p = (i / n) ** 2 * 100  # Quadratic progress for O(n²) algorithms
+            p = (i / n) ** 2 * 100
             progress_callback(p)
     
+    # Set progress to 100%
     if progress_callback:
         progress_callback(100)
     return data
 
 def merge_sort(data, key, descending=False, progress_callback=None, cancel_event=None):
     """
-    Sorts a list of dictionaries using Merge Sort.
-    
-    Complexity:
-        Time:  O(n log n) - all cases (best, average, worst)
-        Space: O(n) - requires additional space for merging
-        Stable: Yes - equal elements maintain relative order
-    
-    Args:
-        data (list): List of dictionaries to sort.
-        key (str): The key in the dictionary to sort by.
-        descending (bool): Sort in descending order if True.
-        progress_callback (callable): Function to call with progress percentage (0-100).
-        cancel_event (threading.Event): Event to check for cancellation.
-        
-    Returns:
-        list: The sorted list, or None if cancelled.
+    Merge Sort - splits array in half, sorts each half, then combines
+    O(n log n) time, O(n) space
     """
+    # Base case: list with 0 or 1 item is already sorted
     if len(data) <= 1:
         return data
     
+    # Setup cancel checker
     is_cancelled = cancel_event.is_set if cancel_event else (lambda: False)
     
-    # Tracking state for progress calculation
+    # Calculate total work for progress tracking
     total_elements = len(data)
     total_work = total_elements * math.log2(total_elements) if total_elements > 1 else 1
-    state = [0]  # Mutable container for nested function access
+    state = [0]  # Using a list so the inner function can modify it
     
     def merge_recursive(arr):
-        """Recursively divide and merge the array."""
+        # Check if user pressed STOP
         if is_cancelled():
             return None
             
+        # Base case: tiny lists don't need sorting
         if len(arr) <= 1:
             return arr
             
-        # Divide: Split array into two halves
+        # Split the list in half
         mid = len(arr) // 2
         left_half = merge_recursive(arr[:mid])
         if left_half is None:
@@ -201,10 +161,11 @@ def merge_sort(data, key, descending=False, progress_callback=None, cancel_event
         if right_half is None:
             return None
         
-        # Conquer: Merge the sorted halves
+        # Now merge the two sorted halves back together
         merged = []
         i = j = 0
         
+        # Pick the smaller item from left or right until one runs out
         while i < len(left_half) and j < len(right_half):
             if is_cancelled():
                 return None
@@ -212,7 +173,7 @@ def merge_sort(data, key, descending=False, progress_callback=None, cancel_event
             val1 = left_half[i].get(key)
             val2 = right_half[j].get(key)
             
-            # Select smaller/larger element based on sort order
+            # Decide which side to pick from
             pick_left = False
             if descending:
                 if val1 >= val2:
@@ -228,11 +189,11 @@ def merge_sort(data, key, descending=False, progress_callback=None, cancel_event
                 merged.append(right_half[j])
                 j += 1
         
-        # Append remaining elements
+        # Add any leftover items
         merged.extend(left_half[i:])
         merged.extend(right_half[j:])
         
-        # Update progress
+        # Update progress bar
         state[0] += len(arr)
         if progress_callback:
             p = (state[0] / total_work) * 100
@@ -240,10 +201,12 @@ def merge_sort(data, key, descending=False, progress_callback=None, cancel_event
         
         return merged
     
+    # Start the recursive sorting
     result = merge_recursive(data[:])
     if result is None:
         return None
         
+    # Set progress to 100%
     if progress_callback:
         progress_callback(100)
     return result
